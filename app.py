@@ -20,7 +20,9 @@ def get_news():
     search = request.args.get('search', '')
 
     url = f'https://newsapi.org/v2/top-headlines?category={category}&apiKey={NEWS_API_KEY}'
-    response = requests.get(url)
+    response = requests.get('https://newsapi.org/v2/everything', params={'q': 'political', 'apiKey': NEWS_API_KEY})
+    print(response.json())
+
     articles = response.json().get('articles', [])
 
     if search:
