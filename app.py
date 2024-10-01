@@ -18,17 +18,26 @@ def index():
 def get_news():
     category = request.args.get('category', 'general')
     search = request.args.get('search', '')
+    country = request.args.get('country', 'us')  # Default to US if no country specified
 
-    url = f'https://newsapi.org/v2/top-headlines?category={category}&apiKey={NEWS_API_KEY}'
-    response = requests.get('https://newsapi.org/v2/everything', params={'q': 'political', 'apiKey': NEWS_API_KEY})
-    print(response.json())
+    # Base URL for News API
+    url = 'https://newsapi.org/v2/top-headlines?'
 
+    # If search is specified, we use the 'everything' endpoint
+    if search:
+        url = f'https://newsapi.org/v2/everything?q={search}&apiKey={NEWS_API_KEY}'
+    else:
+        # Add query parameters based on filters
+        url += f'category={category}&country={country}&apiKey={NEWS_API_KEY}'
+
+    # Make the API request
+    response = requests.get(url)
     articles = response.json().get('articles', [])
 
-    if search:
-        articles = [article for article in articles if search.lower() in article['title'].lower()]
+    # Get the first article's image for the background
+    background_image = articles[0]['urlToImage'] if articles else 'https://via.placeholder.com/1920x1080'
 
-    return jsonify({'articles': articles})
+    return jsonify({'articles': articles, 'background_image': background_image})
 
 if __name__ == '__main__':
     app.run(debug=True)

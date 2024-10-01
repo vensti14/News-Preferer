@@ -4,11 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News Aggregator</title>
+    <style>
+        body {
+            background-size: cover;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #news {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .article {
+            background-color: rgba(0, 0, 0, 0.7);
+            margin: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            transition: transform 0.2s;
+            width: 300px;
+        }
+        .article:hover {
+            transform: scale(1.05);
+        }
+        img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #filters {
+            margin-bottom: 20px;
+        }
+        #search {
+            padding: 10px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>News Aggregator</h1>
-    <div>
+    <div id="filters">
         <input type="text" id="search" placeholder="Search for articles..." />
+        <select id="category">
+            <option value="general">General</option>
+            <option value="business">Business</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="health">Health</option>
+            <option value="science">Science</option>
+            <option value="sports">Sports</option>
+            <option value="technology">Technology</option>
+        </select>
+        <select id="country">
+            <option value="us">United States</option>
+            <option value="gb">United Kingdom</option>
+            <option value="in">India</option>
+            <option value="au">Australia</option>
+            <!-- Add more countries as needed -->
+        </select>
         <button onclick="fetchNews()">Search</button>
     </div>
     <div id="news"></div>
@@ -16,18 +74,37 @@
     <script>
         function fetchNews() {
             const search = document.getElementById('search').value;
-            fetch(`/api/news?search=${search}`)
+            const category = document.getElementById('category').value;
+            const country = document.getElementById('country').value;
+
+            fetch(`/api/news?search=${search}&category=${category}&country=${country}`)
                 .then(response => response.json())
                 .then(data => {
                     const newsDiv = document.getElementById('news');
                     newsDiv.innerHTML = '';  // Clear previous results
+
+                    // Set background image
+                    const backgroundImage = data.background_image || 'https://via.placeholder.com/1920x1080';
+                    document.body.style.backgroundImage = `url(${backgroundImage})`;
+
+                    // Display articles
                     data.articles.forEach(article => {
                         const articleElem = document.createElement('div');
-                        articleElem.innerHTML = `<h2>${article.title}</h2><p>${article.description}</p><a href="${article.url}" target="_blank">Read more</a>`;
+                        articleElem.className = 'article';
+                        articleElem.innerHTML = `
+                            <h2>${article.title}</h2>
+                            <img src="${article.urlToImage || 'https://via.placeholder.com/150'}" alt="${article.title}">
+                            <p>${article.description}</p>
+                            <a href="${article.url}" target="_blank">Read more</a>
+                        `;
                         newsDiv.appendChild(articleElem);
                     });
-                });
+                })
+                .catch(error => console.error('Error fetching news:', error));
         }
+
+        // Call fetchNews on page load to get initial news
+        window.onload = fetchNews;
     </script>
 </body>
 </html>
