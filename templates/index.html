@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Aggregator</title>
+</head>
+<body>
+    <h1>News Aggregator</h1>
+    <div>
+        <input type="text" id="search" placeholder="Search for articles..." />
+        <button onclick="fetchNews()">Search</button>
+    </div>
+    <div id="news"></div>
+
+    <script>
+        function fetchNews() {
+            const search = document.getElementById('search').value;
+            fetch(`/api/news?search=${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    const newsDiv = document.getElementById('news');
+                    newsDiv.innerHTML = '';  // Clear previous results
+                    data.articles.forEach(article => {
+                        const articleElem = document.createElement('div');
+                        articleElem.innerHTML = `<h2>${article.title}</h2><p>${article.description}</p><a href="${article.url}" target="_blank">Read more</a>`;
+                        newsDiv.appendChild(articleElem);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
